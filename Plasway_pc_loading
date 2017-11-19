@@ -1,0 +1,62 @@
+import requests
+import urllib.request
+import re
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from bs4 import BeautifulSoup
+
+
+def geturl(url):
+    url=url
+    session=requests.Session()
+    head={
+
+        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.75 Safari/537.36',
+        'Cookie':'IESESSION=alive; UM_distinctid=15f9eaf05ad350-0866eba71c2ed6-7b1f3c-144600-15f9eaf05ae1ff; tencentSig=4322126848; pgv_pvi=7788571648;'\
+        'pgv_si=s8062633984; Hm_lvt_525ade3c41b447f034eefb94123db1f3=1510195791; Hm_lpvt_525ade3c41b447f034eefb94123db1f3=1510223057; '\
+        'CNZZDATA1619661=cnzz_eid%3D1133067490-1510191338-%26ntime%3D1510218354; '\
+        'JSESSIONID=_gKgUJn7o-4mv21y8xVU8tQ-W_dZsDjpiOzaWOippGgp3wtZxKxw!-563278631; _qddaz=QD.tf0v4c.ga5jzw.j9rvkyvd; _qdda=2-1.1; '\
+        '_qddab=2-u51129.j9sbtdlk; _qddamta_4006067100=2-0'
+        }
+    req = urllib.request.Request(url=url,headers=head)
+    rep = urllib.request.urlopen(req)
+    html = rep.read().decode("gbk","ignore")
+    soup = BeautifulSoup(html, "html.parser")
+    return soup
+
+
+def geturlhttp():
+    soup = geturl("http://plasway.com/")
+    # #等待时长10秒，默认0.5秒询问一次
+    # WebDriverWait(soup,10).until(lambda x:x.find_element_by_id("kw")).send_keys("yoyo")
+    #
+    # #判断id为kw元素是否消失
+    # is_disappeared=WebDriverWait(soup,10,1).\
+    #     until_not(lambda x:x.find_element_by_id("kw").is_displayes())
+    # print(is_disappeared)
+
+    soup1 = soup.find_all(href=re.compile('^http://'))
+    arr = []
+    for i in soup1:
+        arr.append(i.get('href'))
+    return arr
+
+print(geturl("http://t.qq.com/szplas"))
+
+a = geturlhttp()
+print(a)
+j = 0
+for i in a:
+    j += 1
+    if(j==140) or (j==143) or (j==145):
+        continue
+    print("打开文件")
+    f = open('G://test//test' + str(j) + '.txt', 'wb') #写入存储位置
+    print("获取内容")
+    b = geturl(i)
+    gbkTypeStr = b.encode("GBK", "ignore")
+    print("写入")
+    f.write(gbkTypeStr)
+    print("关闭")
+    f.close()
+    print(j)
